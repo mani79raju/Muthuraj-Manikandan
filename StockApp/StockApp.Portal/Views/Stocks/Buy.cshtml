@@ -2,51 +2,58 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @model StockBuyViewModel
+
 <div class="row">
-    <div class="col-md-4">
-        <form id="buyForm" method="post">
-            <h2>Buy</h2>
-            <hr />
-            <input asp-for="@Model.StockId" type="hidden" value="@Model.StockId" class="form-control" aria-required="true" />
-            <input asp-for="@Model.AddDateTimeLocal" type="hidden" id="hidLocalTime" class="form-control" aria-required="true" />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-floating">
-                <input asp-for="@Model.Exchange" readonly class="form-control" aria-required="true" />
-                <label asp-for="@Model.Exchange">Exchange</label>
-            </div>
-            <div class="form-floating">
-                <input asp-for="@Model.StockName" readonly class="form-control" aria-required="true" />
-                <label asp-for="@Model.StockName">Stock name</label>
-            </div>
-            <div class="form-floating">
-                <input asp-for="@Model.StockCode" readonly class="form-control" aria-required="true" />
-                <label asp-for="@Model.StockCode">Stock Code</label>
-            </div>
-            <div class="form-floating">
-                <input asp-for="@Model.MarketPrice" id="txtMP" readonly class="form-control" aria-required="true" />
-                <label asp-for="@Model.MarketPrice">Market Price</label>
-            </div>
-            <div class="form-floating">
-                <label asp-for="BuyTypes" style="margin-top: -16px;font-size: 14px;color: #959699;">Buy Type</label>
-                <div class="form-control">
-                    @foreach (var buyType in Model.BuyTypes)
-                    {
-                        <input type="radio" name="buyTyperadio" onchange="setBuyTypes('@buyType')" aria-required="true" /> @buyType
-                    }
-                <input asp-for="@Model.BuyType" type="hidden" id="hidbuyTypes" class="form-control" aria-required="true" />
+    <div class="col-lg-4">
+        <div class="row">
+        <div class="col-md-12">
+            <form id="buyForm" method="post">
+                <h2>Buy</h2>
+                <hr />
+                <input asp-for="@Model.StockId" type="hidden" value="@Model.StockId" class="form-control" aria-required="true" />
+                <input asp-for="@Model.AddDateTimeLocal" type="hidden" id="hidLocalTime" class="form-control" aria-required="true" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-floating">
+                    <input asp-for="@Model.Exchange" readonly class="form-control" aria-required="true" />
+                    <label asp-for="@Model.Exchange">Exchange</label>
                 </div>
-            </div>
-            <div class="form-floating">
-                <input type="number" asp-for="@Model.BuyCount" class="form-control" aria-required="true" />
-                <label asp-for="@Model.BuyCount">Count</label>
-                <span asp-validation-for="@Model.BuyCount" class="text-danger"></span>
-            </div>
+                <div class="form-floating">
+                    <input asp-for="@Model.StockName" readonly class="form-control" aria-required="true" />
+                    <label asp-for="@Model.StockName">Stock name</label>
+                </div>
+                <div class="form-floating">
+                    <input asp-for="@Model.StockCode" readonly class="form-control" aria-required="true" />
+                    <label asp-for="@Model.StockCode">Stock Code</label>
+                </div>
+                <div class="form-floating">
+                    <input asp-for="@Model.MarketPrice" id="txtMP" readonly class="form-control" aria-required="true" />
+                    <label asp-for="@Model.MarketPrice">Market Price</label>
+                </div>
+                <div class="form-floating">
+                    <label asp-for="BuyTypes" style="margin-top: -16px;font-size: 14px;color: #959699;">Buy Type</label>
+                    <div class="form-control">
+                        @foreach (var buyType in Model.BuyTypes)
+                        {
+                            <input type="radio" name="buyTyperadio" onchange="setBuyTypes('@buyType')" aria-required="true" /> @buyType
+                        }
+                    <input asp-for="@Model.BuyType" type="hidden" id="hidbuyTypes" class="form-control" aria-required="true" />
+                    </div>
+                </div>
+                <div class="form-floating">
+                    <input type="number" asp-for="@Model.BuyCount" class="form-control" aria-required="true" />
+                    <label asp-for="@Model.BuyCount">Count</label>
+                    <span asp-validation-for="@Model.BuyCount" class="text-danger"></span>
+                </div>
             
-            <input id="buySubmit" type="submit" asp-controller="Stocks" asp-action="Buy" onclick="buyClick()" class="w-100 btn btn-lg btn-primary" value="Buy" />
-        </form>
+                <input id="buySubmit" type="submit" asp-controller="Stocks" asp-action="Buy" onclick="buyClick()" class="w-100 btn btn-lg btn-primary" value="Buy" />
+            </form>
+        </div>
+    </div>
+    </div>
+    <div class="col-lg-8">
+        @Html.Partial("../PartialViews/StockLineChart.cshtml")
     </div>
 </div>
-
             <script>
     function setBuyTypes(buyType)
     {
@@ -58,22 +65,14 @@
         $('#hidLocalTime').val(new Date().toLocaleString());
     }
 
-    function GetMarketPrice()
-    {
-        setInterval(function () {
-            $.ajax({
-                type: 'POST',
-                url: '../Stocks/GetMarketPrice',
-                success: function (data) {
-                    $('#txtMP').val(data);
-                },
-                error: function () { }
-            });
-        }, 2000);
-    }
 
+    document.addEventListener("DOMContentLoaded", () => {
+        $('.footer').css('position', 'relative');
+    });
    
-        GetMarketPrice();
+   
+        
     
-
+        
             </script>
+        

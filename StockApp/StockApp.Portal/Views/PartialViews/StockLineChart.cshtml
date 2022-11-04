@@ -1,0 +1,92 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<script src="~/js/chart.js"></script>
+<br />
+<br />
+<br />
+<br />
+<canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+
+<script>
+    function addZero(i) {
+        if (i < 10) { i = "0" + i }
+        return i;
+    }
+
+    function GetTime() {
+        const d = new Date();
+        let h = addZero(d.getHours());
+        let m = addZero(d.getMinutes());
+        let s = addZero(d.getSeconds());
+        let time = h + ":" + m + ":" + s;
+        return time;
+    }
+
+    function GetMarketPrice() {
+        var xValues = [];
+        var yValues = [];
+        var color = "";
+        var temp = "0";
+
+        setInterval(function () {
+            $.ajax({
+                type: 'POST',
+                url: '../Stocks/GetMarketPrice',
+                success: function (data) {
+                    $('#txtMP').val(data);
+
+                    if (xValues.length > 15) {
+                        xValues.shift();
+                        yValues.shift();
+                    }
+
+                    xValues.push(GetTime());
+                    yValues.push(data);
+                    if (data > temp)
+                    {
+                        color = "rgba(4,170,109,1)"; //green
+                    }
+                    else
+                    {
+                        color = "rgba(255,8,8,1)"; //red
+                    }
+
+                    temp = data;
+
+                    var myChart = new Chart("myChart", {
+                        type: "line",
+                        data: {},
+                        options: {}
+                    });
+
+                    new Chart("myChart", {
+                        type: "line",
+                        data: {
+                            labels: xValues,
+                            datasets: [{
+                                fill: false,
+                                lineTension: 0,
+                                borderColor: color,
+                                data: yValues
+                            }]
+                        },
+                        options: {
+                            legend: { display: false },
+                            scales: {
+                                yAxes: [{ ticks: { min: 1, max: 100 } }],
+                            }
+                        }
+                    });
+                },
+                error: function () { }
+            });
+        }, 2000);
+
+    }
+
+    GetMarketPrice();
+</script>

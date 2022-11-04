@@ -9,8 +9,10 @@
     <input type="button" class="btn btn-danger" value="Remove Row" onclick="removeRow();" />
     <input type="button" class="btn btn-success" value="Save" onclick="saveStock();" />
     <input id="hidExchange" type="hidden" value="@ViewBag.ExchangeTypes" />
-    <br />
-    <table class="table table-bordered">
+
+    <div>
+        <br />
+        <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Stock Name</th>
@@ -49,6 +51,7 @@
             }
         </tbody>
     </table>
+    </div>
 </div>
 
 <script>

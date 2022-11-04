@@ -3,7 +3,9 @@
 *@
 @model StockSellViewModel
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-lg-4">
+        <div class="row">
+            <div class="col-md-12">
         <form id="buyForm" method="post">
             <h2>Sell</h2>
             <hr />
@@ -39,26 +41,16 @@
             <button id="sellSubmit" type="submit" asp-controller="Stocks" asp-action="Sell" onclick="sellClick()" class="w-100 btn btn-lg btn-primary">Sell</button>
         </form>
     </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        @Html.Partial("../PartialViews/StockLineChart.cshtml")
+    </div>
 </div>
 
                 <script>
     function sellClick() {
         $('#hidLocalTime').val(new Date().toLocaleString());
     }
-
-    function GetMarketPrice() {
-        setInterval(function () {
-            $.ajax({
-                type: 'POST',
-                url: '../Stocks/GetMarketPrice',
-                success: function (data) {
-                    $('#txtMP').val(data);
-                },
-                error: function () { }
-            });
-        }, 2000);
-    }
-
-
-    GetMarketPrice();
+    
                 </script>

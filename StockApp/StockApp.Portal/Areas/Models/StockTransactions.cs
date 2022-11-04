@@ -20,6 +20,6 @@ namespace StockApp.Portal.Areas.Models
         public int Count { get; set; }
         public DateTime TransactionDateTimeUTC { get; set; }
         public string TransactionDateTimeLocal { get; set; }
-        public virtual Stocks Stocks { get; set; }
+        public Stocks Stocks { get; set; }
     }
 }

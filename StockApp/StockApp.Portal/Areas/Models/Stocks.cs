@@ -18,5 +18,6 @@ namespace StockApp.Portal.Areas.Models
         public string AddDateTimeLocal { get; set; }
         //public virtual StockTransactions StockTransactions { get; set; }
         public List<StocksQuantity> StockQuantity { get; set; }
+        public List<StockTransactions> StockTransactions { get; set; }
     }
 }

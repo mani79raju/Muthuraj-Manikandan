@@ -23,10 +23,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         // Customize the ASP.NET Identity model and override the defaults if needed.
         // For example, you can rename the ASP.NET Identity table names and more.
         // Add your customizations after calling base.OnModelCreating(builder);
-        builder.Entity<Stocks>().HasMany<StocksQuantity>(x => x.StockQuantity).WithOne(x => x.Stocks).HasForeignKey(x => x.StockId);
-            //builder.Entity<ProductMaster>()
-            //.HasOne<ProductCategory>(e => e.ProductCategory)
-            //.WithMany(g => g.Products)
-            //.HasForeignKey(s => s.CategoryId);
+        builder.Entity<Stocks>().HasMany(x => x.StockQuantity).WithOne(x => x.Stocks).HasForeignKey(x => x.StockId);
+        builder.Entity<Stocks>().HasMany(x => x.StockTransactions).WithOne(x => x.Stocks).HasForeignKey(x => x.StockId);
+        //builder.Entity<ProductMaster>()
+        //.HasOne<ProductCategory>(e => e.ProductCategory)
+        //.WithMany(g => g.Products)
+        //.HasForeignKey(s => s.CategoryId);
     }
 }
