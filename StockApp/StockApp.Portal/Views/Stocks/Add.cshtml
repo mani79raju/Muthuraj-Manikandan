@@ -1,0 +1,131 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model List<StockViewModel>
+
+
+<div class="container">
+    <input type="button" class="btn btn-primary" value="Add Row" onclick="addRow();" />
+    <input type="button" class="btn btn-danger" value="Remove Row" onclick="removeRow();" />
+    <input type="button" class="btn btn-success" value="Save" onclick="saveStock();" />
+    <input id="hidExchange" type="hidden" value="@ViewBag.ExchangeTypes" />
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Stock Name</th>
+                <th>Stock Code</th>
+                <th>Exchange</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="stockTbl">
+            @foreach (var stock in Model)
+            {
+                <tr>
+                    <td><input type="text" class="form-control" value="@stock.StockName" id="txtSN-@stock.StockId" /></td>
+                    <td><input type="text" class="form-control" value="@stock.StockCode" id="txtSC-@stock.StockId" /></td>
+                    <td>
+                        <select class="form-control" id="txtSE-@stock.StockId">
+                            @foreach (var exchangeType in ViewBag.ExchangeTypes.Split(","))
+                            {
+                                @if (exchangeType == stock.Exchange)
+                                {
+                                    <option selected>@exchangeType</option>
+                                }
+                                else
+                                {
+                                    <option>@exchangeType</option>
+                                }
+                            }
+                        </select>
+                        @*<input type="hidden" asp-for="@stock.Exchange" value="@stock.Exchange" id="txtSE-@stock.StockId" />*@
+                    </td>
+                    <td>
+                        <input type="button" class="btn btn-warning" value="Update" onclick="updateStock('@stock.StockId');" id="upd-@stock.StockId" />
+                        <input type="button" class="btn btn-danger" value="Delete" onclick="deleteStock('@stock.StockId');" id="del-@stock.StockId" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    function addRow() {
+        var exchanges = '';
+        var exchangeTypes = $('#hidExchange').val().split(',');
+
+        for (i = 0; i < exchangeTypes.length; i++) {
+            exchanges += '<option>' + exchangeTypes[i] + '</option>';
+        }
+
+        $('#stockTbl').append('<tr class="tempRow">' +
+            '<td><input class="txtStockName" type="text"/></td>' +
+            '<td><input class="txtStockCode" type="text" /></td>' +
+            '<td><select class="form-control txtStockExchange" aria-required="true">' +
+            exchanges +
+            '</select></td>' +
+            +'</tr>');
+    }
+
+    function removeRow() {
+        $('.tempRow').remove();
+    }
+
+    function saveStock() {
+        var stockNames = [];
+        var stockCodes = [];
+        var stockExchanges = [];
+
+        $('.txtStockName').each(function (index, value) {
+            if (value.value.trim() != '') {
+                stockNames.push(value.value);
+            }
+        });
+        $('.txtStockCode').each(function (index, value) {
+            if (value.value.trim() != '') {
+                stockCodes.push(value.value);
+            }
+        });
+        $('.txtStockExchange option:selected').each(function (index, value) {
+            if (value.value.trim() != '') {
+                stockExchanges.push(value.value);
+            }
+        });
+
+        var localdate = new Date().toLocaleString();
+        $.ajax({
+            type: 'POST',
+            url: '../Stocks/SaveStock',
+            data: { stockNames: stockNames, stockCodes: stockCodes, stockExchanges: stockExchanges, localDatetime: localdate },
+            success: function () { toastr.success('Stock added.'); setTimeout(function () { window.location.reload(); }, 2000); },
+            error: function () { }
+        });
+    }
+
+    function updateStock(stockId) {
+        var stockName = $('#txtSN-' + stockId).val();
+        var stockCode = $('#txtSC-' + stockId).val();
+        var stockExchange = $('#txtSE-' + stockId + ' option:selected').val();
+
+        $.ajax({
+            type: 'POST',
+            url: '../Stocks/UpdateStock',
+            data: { StockId: stockId, StockName: stockName, StockCode: stockCode, Exchange: stockExchange },
+            success: function (data) { toastr.success('Stock updated.'); },
+            error: function () { }
+        });
+    }
+
+    function deleteStock(stockId) {
+        $.ajax({
+            type: 'POST',
+            url: '../Stocks/DeleteStock',
+            data: { stockId: stockId },
+            success: function (data) { toastr.success('Stock deleted.'); setTimeout(function () { window.location.reload(); }, 1000); },
+            error: function () { }
+        });
+    }
+</script>

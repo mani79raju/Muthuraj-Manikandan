@@ -1,0 +1,81 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model List<InvestedViewModel>
+
+    <script>
+        function GetInvestmentStatus(stockId)
+        {
+            setInterval(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: '../Stocks/GetInvestmentStatus',
+                    data: { stockId: stockId },
+                    success: function (data) {
+                        $('#spanMarketPrice-' + stockId).html(data[0]);
+                        $('#spanInvestedPrice-' + stockId).html(data[1]);
+                        $('#spanStatus-' + stockId).html(data[2]);
+                    if (data[2] == 'Profit') {
+                        $('#spanArrow-' + stockId).html('￪');
+                        $('#spanArrow-' + stockId).css('font-size', '30px').css('color', 'green');
+                    }
+                    else {
+                        $('#spanArrow-' + stockId).html('￬');
+                        $('#spanArrow-' + stockId).css('font-size', '30px').css('color', 'red');
+                    }
+                    },
+                    error: function () { }
+                });
+            }, 2000);
+        }
+
+    function buyStock(stockId) {
+        window.location.href = '../Stocks/Buy?stockId=' + stockId;
+    }
+
+    function sellStock(stockId) {
+        window.location.href = '../Stocks/Sell?stockId=' + stockId;
+    }
+
+    </script>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Stock Name</th>
+            <th>Stock Code</th>
+            <th>Exchange</th>
+            <th>Quantity</th>
+            <th>Avg. Cost Price/Share</th>
+            <th>Market Price/Share</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="stockTbl">
+        @foreach (var stock in Model)
+        {
+            <tr>
+                <td><span id="spanSN-@stock.StockId">@stock.StockName</span></td>
+                <td><span id="spanSC-@stock.StockId">@stock.StockCode</span></td>
+                <td><span id="spanEx-@stock.StockId">@stock.Exchange</span></td>
+                <td><span id="spanQuantity-@stock.StockId">@stock.AvailableCount</span></td>
+                <td><span id="spanInvestedPrice-@stock.StockId">@stock.InvestedPrice</span></td>
+                <td><span id="spanMarketPrice-@stock.StockId">@stock.MarketPrice</span></td>
+                <td>
+                    <div>
+                        <span id="spanStatus-@stock.StockId">@stock.StockStatus</span>
+                        <span id="spanArrow-@stock.StockId">￬</span>
+                    </div>
+                </td>
+                <td>
+                    <input type="button" class="btn btn-success" onclick="buyStock('@stock.StockId')" value="Buy" />
+                    <input type="button" class="btn btn-warning" onclick="sellStock('@stock.StockId')" value="Sell" />
+                    <script>GetInvestmentStatus('@stock.StockId');</script>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

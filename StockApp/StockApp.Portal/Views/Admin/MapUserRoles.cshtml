@@ -1,0 +1,69 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model StockApp.Portal.ViewModels.MapRoleViewModel
+
+<div class="container">
+    <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="roleTbl">
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td><span id="fn-@user.Id">@user.FirstName</span></td>
+                <td><span id="ln-@user.Id">@user.LastName</span></td>
+                <td><span id="email-@user.Id">@user.Email</span></td>
+                <td>
+                    @{
+                        var userRoleIds = Model.UserRoles.Where(x => x.UserId == user.Id).Select(x => x.RoleId).ToList();
+                        int i = 0;
+                        foreach (var role in Model.Roles)
+                        {
+                            var isAssigned = userRoleIds.Contains(role.Id) ? true : false;
+                            if (i == 3)
+                            {
+                                    <br />
+                                i = 0;
+                            }
+                                <input type="checkbox" checked="@isAssigned"  value="@role.Id" class="chk-@user.Id"/>@role.Name
+                            i++;
+                        }
+                    }
+                </td>
+                <td>
+                    <input type="button" class="btn btn-warning" value="Update" onclick="mapUserRole('@user.Id','@user.Email');" id="updRole-@user.Id" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+
+<script>
+    function mapUserRole(userId, useremail)
+    {
+        var roleIds = [];
+
+        $('.chk-' + userId).each(function(index,value){
+            if(value.checked)
+            {
+                roleIds.push(value.value);
+            }
+        });
+        $.ajax({
+            type:'POST',
+            url: '../Admin/MapUserRole',
+            data: { UserId: userId, RoleIds: roleIds },
+            success: function () { toastr.success('Roles mapped to the ' + useremail); },
+            error: function() { }
+        });
+    }
+</script>

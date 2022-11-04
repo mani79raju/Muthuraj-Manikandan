@@ -1,0 +1,89 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model List<StockApp.Portal.ViewModels.RoleViewModel>
+
+<div class="container">
+    <input type="button" class="btn btn-primary" value="Add Row" onclick="addRow();" />
+    <input type="button" class="btn btn-danger" value="Remove Row" onclick="removeRow();" />
+    <input type="button" class="btn btn-success" value="Save" onclick="saveRole();" />
+    <br />
+    <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Role</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="roleTbl">
+        @foreach(var role in Model)
+        {
+            <tr>
+                <td><input type="text" value="@role.Name" id="txt-@role.Id"/></td>
+                <td><span id="desc-@role.Id">@role.Name</span></td>
+                <td>
+                    <input type="button" class="btn btn-warning" value="Update" onclick="updateRole('@role.Id');" id="upd-@role.Id" />
+                    <input type="button" class="btn btn-danger" value="Delete" onclick="deleteRole('@role.Id');" id="del-@role.Id" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+
+<script>
+
+    function addRow()
+    {
+        $('#roleTbl').append('<tr class="tempRow"><td><input class="txtRoles" type="text"/></td></tr>');
+    }
+
+    function removeRow() {
+        $('.tempRow').remove();
+    }
+
+    function saveRole()
+    {
+        var roleNames = [];
+        $('.txtRoles').each(function (index, value) {
+            if(value.value.trim() != '')
+            {
+                roleNames.push(value.value);
+            }
+        });
+
+        $.ajax({
+            type: 'POST',
+            url: '../Admin/SaveRole',
+            data: { roleNames: roleNames },
+            success: function () { toastr.success('Role added.'); setTimeout(function () { window.location.reload(); }, 2000); },
+            error: function () { }
+        });
+    }
+
+    function updateRole(roleId) {
+        var roleName = $('#txt-'+ roleId).val();
+        $.ajax({
+            type:'POST',
+            url:'../Admin/UpdateRole',
+            data:{Id : roleId, Name : roleName},
+            success: function (data) { $('#desc-' + roleId).html(roleName); toastr.success('Role updated.'); },
+            error:function(){}
+        });
+    }
+
+    function deleteRole(roleId) {
+        $.ajax({
+            type: 'POST',
+            url: '../Admin/DeleteRole',
+            data: { Id: roleId },
+            success: function (data) { toastr.success('Role deleted.'); setTimeout(function () { window.location.reload(); }, 1000); },
+            error: function () { }
+        });
+    }
+    
+</script>
