@@ -27,6 +27,8 @@
                         </li>
                         @using Microsoft.AspNetCore.Identity
                         @using StockApp.Portal.Areas.Identity.Data
+                        @using System.Security.Claims
+                        @using StockApp.Portal.Helpers
                         @inject SignInManager<ApplicationUser> SignInManager
                         @inject UserManager<ApplicationUser> UserManager
                         @if (SignInManager.IsSignedIn(User))
@@ -35,17 +37,29 @@
                                 <div class="dropdown">
                                     <a class="nav-link text-dark dropbtn">Stocks</a>
                                     <div class="dropdown-content">
+                                        @if(User.Claims.Any(x => x.Type.ToLower().Contains(Constants.AdminClaim.ToLower())))
+                                        {
                                         <a class="nav-link text-dark" asp-controller="Stocks" asp-action="Add">Add</a>
+                                        }
                                         <a class="nav-link text-dark" asp-controller="Stocks" asp-action="StocksList">List</a>
                                         <a class="nav-link text-dark" asp-controller="Stocks" asp-action="Invested">My Investments</a>
                                     </div>
                                 </div>
                             </li>
+                            @if(User.Claims.Any(x => x.Type.ToLower().Contains(Constants.AdminClaim.ToLower())))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Roles">Roles</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="MapUserRoles">Map User Roles</a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Roles">Roles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="MapUserRoles">Map User Roles</a>
+                                <a class="nav-link text-dark" asp-controller="Stocks" asp-action="StocksList">Stocks</a>
                             </li>
                         }
                     </ul>

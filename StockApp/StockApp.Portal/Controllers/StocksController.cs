@@ -1,14 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using IronPdf;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using StockApp.Portal.Areas.Identity.Data;
+using StockApp.Portal.Helpers;
 using StockApp.Portal.Options;
 using StockApp.Portal.Repositories;
 using StockApp.Portal.ViewModels;
 using System;
+using System.Text;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace StockApp.Portal.Controllers
 {
+
     public class StocksController : Controller
     {
         IUnitOfWork UnitOfWork { get; set; }
@@ -27,6 +33,7 @@ namespace StockApp.Portal.Controllers
             return View();
         }
 
+        [Authorize(Policy = Constants.AdminPolicy)]
         public IActionResult Add()
         {
             var stocks = UnitOfWork.Stocks.GetStocks().Select(x => new StockViewModel() { StockId = x.StockId, StockName = x.StockName, StockCode = x.StockCode, Exchange = x.Exchange }).ToList();
@@ -34,17 +41,36 @@ namespace StockApp.Portal.Controllers
             return View(stocks);
         }
 
-        public IActionResult StocksList()
+        //[Authorize(Policy = Constants.InvestorPolicy)]
+        public IActionResult StocksList(string api)
         {
-            var stocks = UnitOfWork.Stocks.GetStocks().Select(x => new StockViewModel() { YesterdayMarketPrice = (double)Random.Shared.Next(1, 1000) / 10, StockId = x.StockId, StockName = x.StockName, StockCode = x.StockCode, Exchange = x.Exchange }).ToList();
+            var stocks = new List<StockViewModel>();
+            if (string.IsNullOrEmpty(api))
+            {
+                stocks = UnitOfWork.Stocks.GetStocks().Select(x => new StockViewModel() { YesterdayMarketPrice = (double)Random.Shared.Next(1, 1000) / 10, StockId = x.StockId, StockName = x.StockName, StockCode = x.StockCode, Exchange = x.Exchange }).ToList();
+            }
+            else
+            {
+                stocks = GetStocksApiList().Result;
+            }
+            
             return View(stocks);
         }
 
-        public IActionResult Invested()
+        [Authorize(Policy = Constants.InvestorPolicy)]
+        public IActionResult Invested(string api)
         {
-            var user = UserRepository.GetUserByEmail(User.Identity.Name);
-            var model = UnitOfWork.Stocks.GetStockQuantities(x => x.UserId == user.Id && x.Count > 0).ToList();
-            var  stocks = model.Select(x => new InvestedViewModel() { StockId = x.StockId, StockName = x.Stocks.StockName, StockCode = x.Stocks.StockCode, Exchange = x.Stocks.Exchange, AvailableCount = x.Count }).ToList();
+            var stocks = new List<InvestedViewModel>();
+            if (string.IsNullOrEmpty(api))
+            {
+                var user = UserRepository.GetUserByEmail(User.Identity.Name);
+                var model = UnitOfWork.Stocks.GetStockQuantities(x => x.UserId == user.Id && x.Count > 0).ToList();
+                stocks = model.Select(x => new InvestedViewModel() { StockId = x.StockId, StockName = x.Stocks.StockName, StockCode = x.Stocks.StockCode, Exchange = x.Stocks.Exchange, AvailableCount = x.Count }).ToList();
+            }
+            else
+            {
+                stocks = GetMyStocksApiList().Result;
+            }
             return View(stocks);
         }
 
@@ -77,7 +103,7 @@ namespace StockApp.Portal.Controllers
                 var utcDate = DateTime.UtcNow;
                 for (int i = 0; i < stockNames.Length; i++)
                 {
-                    stocks.Add(new StockViewModel() { 
+                    stocks.Add(new StockViewModel() {
                         StockName = stockNames[i],
                         StockCode = stockCodes[i],
                         Exchange = stockExchanges[i],
@@ -159,6 +185,52 @@ namespace StockApp.Portal.Controllers
                 UnitOfWork.Stocks.SellStock(stock);
             }
             return RedirectToAction("Invested");
+        }
+
+        //[HttpPost]
+        public IActionResult ExportPDF()
+        {
+            var user = UserRepository.GetUserByEmail(User.Identity.Name);
+            var model = UnitOfWork.Stocks.GetStockQuantities(x => x.UserId == user.Id && x.Count > 0).ToList();
+            var htmlTemplate = new StringBuilder("<table>");
+            var stocks = model.Select(x => "<tr><td>" + x.StockId + "</td><td>" + x.Stocks.StockName + "</td><td>" + x.Stocks.StockCode + "</td><td>" + x.Stocks.Exchange + "</td><td>" + x.Count + "</td></tr>").ToList();
+            htmlTemplate.Append(string.Join("", stocks));
+            htmlTemplate.Append("</table>");
+            var pdf = new ChromePdfRenderer();
+            var pdfDoc = pdf.RenderHtmlAsPdf(htmlTemplate.ToString());
+            
+            return File(pdfDoc.Stream,"application/pdf","MyInvestments.pdf");
+        }
+
+        public async Task<List<StockViewModel>> GetStocksApiList()
+        {
+            var response = new List<StockViewModel>();
+            using (var client = new HttpClient())
+            {
+                var token = User.Claims.Where(x => x.Type == "JWT").Select(x => x.Value).FirstOrDefault();
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+               // client.DefaultRequestHeaders.Authorization =
+               //new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                var httpResponse = await client.GetAsync("https://localhost:7208/GetAllStocks");
+                var result = await httpResponse.Content.ReadAsStringAsync();
+                response = JsonConvert.DeserializeObject<List<StockViewModel>>(result);
+            }
+            return response;
+        }
+
+        public async Task<List<InvestedViewModel>> GetMyStocksApiList()
+        {
+            var response = new List<InvestedViewModel>();
+            using (var client = new HttpClient())
+            {
+                var user = UserRepository.GetUserByEmail(User.Identity.Name);
+                var token = User.Claims.Where(x => x.Type == "JWT").Select(x => x.Value).FirstOrDefault();
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                var httpResponse = await client.GetAsync("https://localhost:7208/GetMyStocks/" + user.Id);
+                var result = await httpResponse.Content.ReadAsStringAsync();
+                response = JsonConvert.DeserializeObject<List<InvestedViewModel>>(result);
+            }
+            return response;
         }
     }
 }

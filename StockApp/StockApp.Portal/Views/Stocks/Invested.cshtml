@@ -18,18 +18,23 @@
                         $('#spanMarketPrice-' + stockId).html(data[0]);
                         $('#spanInvestedPrice-' + stockId).html(data[1]);
                         $('#spanStatus-' + stockId).html(data[2]);
-                    if (data[2] == 'Profit') {
-                        $('#spanArrow-' + stockId).html('￪');
-                        $('#spanArrow-' + stockId).css('font-size', '30px').css('color', 'green');
-                    }
-                    else {
-                        $('#spanArrow-' + stockId).html('￬');
-                        $('#spanArrow-' + stockId).css('font-size', '30px').css('color', 'red');
-                    }
+                        $('#spanReturn-' + stockId).html(data[3]);
+                        if (data[2] == 'Profit') {
+                            $('#spanArrow-' + stockId).html('￪');
+                            $('#spanArrow-' + stockId).css('font-size', '20px').css('color', 'green');
+                            $('#spanReturn-' + stockId).html('+' + data[3]);
+                            $('#spanReturn-' + stockId).css('font-size', '20px').css('color', 'green');
+                        }
+                        else {
+                            $('#spanArrow-' + stockId).html('￬');
+                            $('#spanArrow-' + stockId).css('font-size', '20px').css('color', 'red');
+                            $('#spanReturn-' + stockId).html('-' + data[3]);
+                            $('#spanReturn-' + stockId).css('font-size', '20px').css('color', 'red');
+                        }
                     },
                     error: function () { }
                 });
-            }, 2000);
+            }, 1000);
         }
 
     function buyStock(stockId) {
@@ -40,7 +45,24 @@
         window.location.href = '../Stocks/Sell?stockId=' + stockId;
     }
 
+    function exportPDF() {
+        window.location = "../Stocks/ExportPDF";
+        //$.ajax({
+        //    type:'POST',
+        //    url:'../Stocks/ExportPDF',
+        //    success:function(){
+        //        toastr.success('PDF downloaded');
+        //    }
+        //});
+    }
+
     </script>
+
+<h2>My Investments</h2>
+
+<div class="col-sm-12 nav nav-right" style="align-items:right;">
+    <input class="btn btn-primary" type="button" onclick="exportPDF()" value="Export PDF" />
+</div>
 
 <table class="table table-bordered">
     <thead>
@@ -51,6 +73,8 @@
             <th>Quantity</th>
             <th>Avg. Cost Price/Share</th>
             <th>Market Price/Share</th>
+            <th>Status</th>
+            <th style="width: 100px !important;">Returns</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -68,6 +92,11 @@
                     <div>
                         <span id="spanStatus-@stock.StockId">@stock.StockStatus</span>
                         <span id="spanArrow-@stock.StockId">￬</span>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <span id="spanReturn-@stock.StockId">0</span>
                     </div>
                 </td>
                 <td>

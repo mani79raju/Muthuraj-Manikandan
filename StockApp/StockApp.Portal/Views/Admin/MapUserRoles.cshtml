@@ -2,7 +2,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @model StockApp.Portal.ViewModels.MapRoleViewModel
-
+<link href="~/css/checkboxslide.css" rel="stylesheet" />
 <div class="container">
     <table class="table table-bordered">
     <thead>
@@ -22,21 +22,34 @@
                 <td><span id="ln-@user.Id">@user.LastName</span></td>
                 <td><span id="email-@user.Id">@user.Email</span></td>
                 <td>
-                    @{
-                        var userRoleIds = Model.UserRoles.Where(x => x.UserId == user.Id).Select(x => x.RoleId).ToList();
-                        int i = 0;
-                        foreach (var role in Model.Roles)
-                        {
-                            var isAssigned = userRoleIds.Contains(role.Id) ? true : false;
-                            if (i == 3)
+                    <table>
+                        <tr><td>
+                    
+                        @{
+                            var userRoleIds = Model.UserRoles.Where(x => x.UserId == user.Id).Select(x => x.RoleId).ToList();
+                            int chBoxCount = 0;
+                            int chkBoxTotal = 0;
+                            foreach (var role in Model.Roles)
                             {
-                                    <br />
-                                i = 0;
+                                var isAssigned = userRoleIds.Contains(role.Id) ? true : false;
+                                 if (chBoxCount == 3)
+                                {
+                                        <br />
+                                        chBoxCount = 0;
+                                }
+                                <label>@role.Name</label>
+                                <label class="switch" for="checkbox-@user.Id-@chkBoxTotal">
+                                    
+                                    <input type="checkbox" id="checkbox-@user.Id-@chkBoxTotal" checked="@isAssigned" value="@role.Id" class="chk-@user.Id" />
+                                    <div class="slider round"></div>
+                                </label>
+
+                                chBoxCount++;
+                                chkBoxTotal++;
                             }
-                                <input type="checkbox" checked="@isAssigned"  value="@role.Id" class="chk-@user.Id"/>@role.Name
-                            i++;
                         }
-                    }
+                        </td></tr>
+                        </table>
                 </td>
                 <td>
                     <input type="button" class="btn btn-warning" value="Update" onclick="mapUserRole('@user.Id','@user.Email');" id="updRole-@user.Id" />

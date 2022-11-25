@@ -27,8 +27,8 @@
     }
 
     function GetMarketPrice() {
-        var xValues = [];
-        var yValues = [];
+        var xValues = [15, 10, 36, 3, 24, 14, 18];
+        var yValues = [15, 10, 36, 3, 24, 14, 18];
         var color = "";
         var temp = "0";
 
@@ -68,6 +68,7 @@
                         data: {
                             labels: xValues,
                             datasets: [{
+                                label: 'Market Price Monitor',
                                 fill: false,
                                 lineTension: 0,
                                 borderColor: color,
@@ -75,7 +76,7 @@
                             }]
                         },
                         options: {
-                            legend: { display: false },
+                            legend: { display: true },
                             scales: {
                                 yAxes: [{ ticks: { min: 1, max: 100 } }],
                             }

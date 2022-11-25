@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StockApp.Portal.Areas.Identity.Data;
+using StockApp.Portal.Helpers;
 using StockApp.Portal.Options;
 using StockApp.Portal.Repositories;
 
@@ -20,7 +21,8 @@ namespace StockApp.Portal
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            builder.Services.AddAuthorization(policy => policy.AddPolicy("Admin",options => options.RequireClaim("AdminClaim")));
+            builder.Services.AddAuthorization(policy => policy.AddPolicy(Constants.AdminPolicy,options => options.RequireClaim(Constants.AdminClaim)));
+            builder.Services.AddAuthorization(policy => policy.AddPolicy(Constants.InvestorPolicy, options => options.RequireClaim(Constants.InvestorClaim)));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();

@@ -16,6 +16,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using StockApp.Portal.Areas.Identity.Data;
 using System.Security.Claims;
+using StockApp.Portal.Helpers;
+using Newtonsoft.Json;
+using StockApp.Portal.ViewModels;
+using System.Text.Json;
 
 namespace StockApp.Portal.Areas.Identity.Pages.Account
 {
@@ -103,6 +107,18 @@ namespace StockApp.Portal.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
+        public async Task<string> GenerateJWTToken(LoginViewModel model)
+        {
+            var token = "";
+            using (var client = new HttpClient())
+            {
+                var httpResponse = await client.PostAsJsonAsync("https://localhost:7208/security/createToken", model);
+                var result = await httpResponse.Content.ReadAsStringAsync();
+                token = JsonConvert.DeserializeObject<string>(result);
+            }
+            return token;
+        }
+
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -125,10 +141,22 @@ namespace StockApp.Portal.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    var claims = new Claim[] { new Claim("AdminClaim", "Yes") };
-
                     var userRole = await _signInManager.UserManager.GetRolesAsync(user);
+                    
+                    List<Claim> claims = new List<Claim>();
 
+                    if (userRole.Any(x => x.ToLower() == Constants.AdminRole.ToLower()))
+                    {
+                        claims.Add(new Claim(Constants.AdminClaim, "Yes"));
+                    }
+
+                    if (userRole.Any(x => x.ToLower() == Constants.InvestorRole.ToLower()))
+                    {
+                        claims.Add(new Claim(Constants.InvestorClaim, "Yes"));
+                    }
+
+                    //var jwtToken = await GenerateJWTToken(new LoginViewModel() { userName = user.UserName, password = Input.Password, claims = claims });
+                    //claims.Add(new Claim("JWT", jwtToken));
                     await _signInManager.SignInWithClaimsAsync(user, Input.RememberMe, claims);
 
                     _logger.LogInformation("User logged in.");

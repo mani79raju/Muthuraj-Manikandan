@@ -40,12 +40,12 @@
                     </div>
                 </div>
                 <div class="form-floating">
-                    <input type="number" asp-for="@Model.BuyCount" class="form-control" aria-required="true" />
+                    <input type="number" id="buyCount" asp-for="@Model.BuyCount" class="form-control" aria-required="true" />
                     <label asp-for="@Model.BuyCount">Count</label>
                     <span asp-validation-for="@Model.BuyCount" class="text-danger"></span>
                 </div>
             
-                <input id="buySubmit" type="submit" asp-controller="Stocks" asp-action="Buy" onclick="buyClick()" class="w-100 btn btn-lg btn-primary" value="Buy" />
+                <input id="buySubmit" type="submit" asp-controller="Stocks" asp-action="Buy" onclick="return buyClick()" class="w-100 btn btn-lg btn-primary" value="Buy" />
             </form>
         </div>
     </div>
@@ -62,7 +62,24 @@
 
     function buyClick()
     {
+        if ($('#hidbuyTypes').val()=='')
+        {
+            toastr.error('Select Buy Type');
+            return false;
+        }
+
+        if ($('#buyCount').val() == '0' || $('#buyCount').val() == '') {
+            toastr.error('Enter the number of count');
+            return false;
+        }
+
+        if ($('#buyCount').val().includes('.') || $('#buyCount').val().includes('-')) {
+            toastr.error('Enter the valid number of count');
+            return false;
+        }
+
         $('#hidLocalTime').val(new Date().toLocaleString());
+        return true;
     }
 
 

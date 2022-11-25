@@ -15,6 +15,24 @@ namespace StockApp.Portal.Repositories
             Context = context;
         }
 
+        public string AddStock(StockViewModel stock)
+        {
+            if (stock != null)
+            {
+                Context.Stocks.Add(new Stocks()
+                {
+                    StockName = stock.StockName,
+                    Exchange = stock.Exchange,
+                    StockCode = stock.StockCode,
+                    //StockId = Guid.NewGuid().ToString(),
+                    AddDateTimeUTC = DateTime.UtcNow,
+                    AddDateTimeLocal = stock.AddDateTimeLocal
+                });
+                Context.SaveChanges();
+            }
+            return "Stocks Added";
+        }
+
         public string AddStock(List<StockViewModel> stocks)
         {
             if (stocks != null && stocks.Count > 0)
@@ -144,7 +162,7 @@ namespace StockApp.Portal.Repositories
             var transactionPrice = Context.StockTransactions.Where(x => x.StockId == stockId && x.UserId == userId && x.TransactionType == "Buy").Select(x => new { x.BuyPrice, x.SellPrice }).ToList();
             var avgCostPrice = transactionPrice.Select(x => x.BuyPrice).Sum() / stockQuantity;
             var status = (avgCostPrice < marketPrice) ? "Profit" : "Loss";
-            return new string[] { marketPrice.ToString(), avgCostPrice.ToString(), status };
+            return new string[] { marketPrice.ToString(), Math.Round(avgCostPrice,2).ToString(), status, Math.Round(marketPrice * stockQuantity, 2).ToString() };
         }
 
         public string[] GetStockMarketPrice(string stockId, double yesterdayMarketPrice, double todayMarketPrice)

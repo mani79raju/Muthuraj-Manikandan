@@ -1,6 +1,12 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@using Microsoft.AspNetCore.Identity
+@using StockApp.Portal.Areas.Identity.Data
+@using System.Security.Claims
+@using StockApp.Portal.Helpers
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @model List<StockViewModel>
 
 <script>
@@ -27,7 +33,7 @@
                 },
                 error: function () { }
             });
-        }, 2000);
+        }, 1000);
 
     }
 
@@ -46,7 +52,10 @@
             <th>Market Price(Yesterday)</th>
             <th>Market Price(Today)</th>
             <th>Status</th>
-            <th>Action</th>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <th>Action</th>
+                }
         </tr>
     </thead>
     <tbody id="stockTbl">
@@ -63,11 +72,14 @@
                         <span id="spanStatus-@stock.StockId">@stock.StockStatus</span>
                             <span id="spanArrow-@stock.StockId">￬</span>
                     </div>
-                </td>
-                <td>
-                    <input type="button" class="btn btn-success" value="Buy" id="buy-@stock.StockId" onclick="buyStock('@stock.StockId');" />
                         <script>GetStockMarketPrice('@stock.StockId', '@stock.YesterdayMarketPrice');</script>
                 </td>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <td>
+                            <input type="button" class="btn btn-success" value="Buy" id="buy-@stock.StockId" onclick="buyStock('@stock.StockId');" />
+                        </td>
+                    }
             </tr>
         }
     </tbody>

@@ -1,8 +1,30 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@using Microsoft.AspNetCore.Identity
+@using StockApp.Portal.Areas.Identity.Data
+@using System.Security.Claims
+@using StockApp.Portal.Helpers
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
-<div class="text-center">
+@*<div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>*@
+@*<img src="~/images/home.jpg" />*@
+
+<div id="mydiv">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div class="text-center">
+            <h1 class="display-4">Welcome back <b>@UserManager.GetUserName(User).Split('@')[0]</b></h1>
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <h1 class="display-4">Stock App</h1>
+        </div>
+    }
 </div>

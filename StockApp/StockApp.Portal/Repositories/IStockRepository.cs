@@ -8,6 +8,7 @@ namespace StockApp.Portal.Repositories
     {
         List<Stocks> GetStocks();
         Stocks GetStockById(string stockId);
+        string AddStock(StockViewModel stock);
         string AddStock(List<StockViewModel> stocks);
         string UpdateStock(StockViewModel stock);
         string DeleteStock(string stockId);

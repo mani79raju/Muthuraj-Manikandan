@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Portal.ViewModels;
 using StockApp.Portal.Repositories;
+using StockApp.Portal.Helpers;
 
 namespace StockApp.Portal.Controllers
 {
-	public class AdminController : Controller
+    [Authorize(Policy = Constants.AdminPolicy)]
+    public class AdminController : Controller
 	{
 		IUnitOfWork UnitOfWork { get; set; }
 
@@ -33,8 +35,7 @@ namespace StockApp.Portal.Controllers
             model.UserRoles = UnitOfWork.Role.GetMappedUserRoles();
             return View(model);
         }
-
-        [Authorize(Policy = "Admin")]
+        
         public void SaveRole(string[] roleNames)
         {
             if (roleNames != null && roleNames.Length > 0)
